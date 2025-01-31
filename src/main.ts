@@ -1,12 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const allowedOrigins = [
-    'http://localhost:4200', // Lokalny Angular
-    'https://twoja-aplikacja-angular.vercel.app', // Angular na Vercel
-  ];
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : ['http://localhost:4200', 'https://twoja-aplikacja-angular.vercel.app'];
 
   app.enableCors({
     origin: (origin, callback) => {
@@ -18,6 +19,9 @@ async function bootstrap() {
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
-  });  await app.listen(process.env.PORT ?? 3000);
+  });
+
+  await app.listen(process.env.PORT ?? 3000);
 }
+
 bootstrap();
